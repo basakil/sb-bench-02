@@ -1,0 +1,24 @@
+management:
+  health:
+    probes:
+      enabled: true
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: health, env
+  endpoint:
+    health:
+      enabled: true
+
+server:
+  port: 8083
+
+group01:
+  key01: value01
+  key02: value02
+  subgroup01:
+    key01: subgroup01-value01
+    key02: subgroup01-value02
+    key03: subgroup01-value03
+

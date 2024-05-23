@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>nom.aob.sb</groupId>
+	<artifactId>sb-bench-02</artifactId>
+	<version>1.0.0-main</version>
+	<name>${project.artifactId}</name>
+	<description>Demo project for Spring Boot ${project.parent.version} with java ${java.version}.</description>
+
+	<properties>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<java.version>21</java.version>
+
+		<start-class>nom.aob.sb.sbbench02.SbBench02Application</start-class>
+
+		<docker.image.name>${project.artifactId}</docker.image.name>
+		<docker.image.tag>${project.version}</docker.image.tag>
+
+		<!--		<spring-cloud.version>Hoxton.SR10</spring-cloud.version>-->
+
+		<jib.version>3.4.2</jib.version>
+		<jib.from.image>ghcr.io/graalvm/jdk-community:21</jib.from.image>
+		<jib.to.registry>registry.hub.docker.com/basakil</jib.to.registry>
+
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>${jib.version}</version>
+
+				<configuration>
+					<from>
+						<!--                        <image>adoptopenjdk:8u275-b01-jre-openj9-0.23.0@sha256:81554eca4e04335c33537561607efdcd06a8acd00d2e9eda6a6d094150154627</image>-->
+						<image>${jib.from.image}</image>
+					</from>
+					<to>
+						<image>${jib.to.registry}/${docker.image.name}:${docker.image.tag}</image>
+						<tags>
+							<tag>latest</tag>
+						</tags>
+					</to>
+
+					<container>
+						<!-- Assumes you have /bin/sh as specified at the top of /my-entrypoint.sh. -->
+						<entrypoint>/service-aware-entrypoint.sh</entrypoint>
+					</container>
+					<!-- You also need to make the script executable. -->
+					<extraDirectories>
+						<permissions>
+							<permission>
+								<file>/service-aware-entrypoint.sh</file>
+								<mode>755</mode>
+							</permission>
+						</permissions>
+					</extraDirectories>
+
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
