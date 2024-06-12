@@ -30,7 +30,7 @@
 		<docker.image.name>${project.artifactId}</docker.image.name>
 		<docker.image.tag>${project.version}</docker.image.tag>
 
-		<!--		<spring-cloud.version>Hoxton.SR10</spring-cloud.version>-->
+		<spring-cloud.version>2023.0.0</spring-cloud.version>
 
 		<jib.version>3.4.2</jib.version>
 		<jib.from.image>ghcr.io/graalvm/jdk-community:21</jib.from.image>
@@ -63,7 +63,23 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
@@ -83,12 +99,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>

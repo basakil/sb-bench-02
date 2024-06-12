@@ -14,6 +14,12 @@ management:
 server:
   port: 8083
 
+sbbench:
+  ## feign clients:
+  clients:
+    selfrest:
+      url: "http://localhost:8083"
+
 group01:
   key01: value01
   key02: value02

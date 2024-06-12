@@ -2,6 +2,7 @@ package nom.aob.sb.sbbench02.controller.rest;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import nom.aob.sb.sbbench02.feign.SelfRestClient;
 import nom.aob.sb.sbbench02.model.SimpleResponse;
 import nom.aob.sb.sbbench02.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +18,24 @@ import org.springframework.web.client.RestTemplate;
 public class SimpleRestController {
 
     private final RestTemplate restTemplate;
+    private final SelfRestClient selfRestClient;
 
     public static final String PATH_SIMPLE = "/simple";
     public static final String PATH_PROXY = "/proxy";
     public static final String PATH = "/rest";
     public static final String SCHEME_HTTP = "http://";
 
+
     @Value("${sbbench.logstring:#{null}}")
     private String logString;
 
+    @Value("${sbbench.rest.path.feign:feign}")
+    private String feignProxyUrl;
+
     @Autowired
-    public SimpleRestController(RestTemplate restTemplate) {
+    public SimpleRestController(RestTemplate restTemplate, SelfRestClient selfRestClient) {
         this.restTemplate = restTemplate;
+        this.selfRestClient = selfRestClient;
     }
 
     @GetMapping(PATH_SIMPLE)
@@ -41,13 +48,6 @@ public class SimpleRestController {
         }
 
         SimpleResponse simpleResponse = Utils.newSimpleResponse(PATH_SIMPLE);
-//                SimpleResponse.builder()
-//                .hostString(Utils.getHostname())
-//                .pathString(PATH_SIMPLE)
-//                .timeString(Utils.getCurrentTimeString())
-//                .randomInteger(Utils.newRandomInt())
-//                .threadID(Thread.currentThread().getId())
-//                .build();
 
         return new ResponseEntity<>(simpleResponse, HttpStatus.OK);
     }
@@ -63,20 +63,43 @@ public class SimpleRestController {
             log.info("in simpleProxy. logString = {}.", logString);
         }
 
-        StringBuilder sb = new StringBuilder(SCHEME_HTTP);
-        sb.append(address).append(":").append(port).append(PATH).append(PATH_SIMPLE);
-        String resourceUrl = sb.toString();
+        String resourceUrl = SCHEME_HTTP + address + ":" + port + PATH + PATH_SIMPLE;
 
         ResponseEntity<SimpleResponse> response
                 = restTemplate.getForEntity(resourceUrl, SimpleResponse.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
             SimpleResponse simpleResponse = response.getBody();
-            simpleResponse.setPathString(PATH_PROXY + "/" + address + "/" + port);
-            return new ResponseEntity<>(simpleResponse, response.getStatusCode());
+            if (simpleResponse != null) {
+                simpleResponse.setPathString(PATH_PROXY + "/" + address + "/" + port);
+                return new ResponseEntity<>(simpleResponse, response.getStatusCode());
+            }
         }
 
         return response;
     }
 
+    @GetMapping("#{'${sbbench.rest.path.feign:feign}'}")
+    public @NonNull ResponseEntity<SimpleResponse> feignProxy(
+            @RequestHeader(value = "x-b3-traceid", required = false) String traceId) {
+
+//        log.info("in simpleProxy: " + traceId);
+        if (logString != null) {
+            log.info("in feignProxy. logString = {}.", logString);
+        }
+
+
+        ResponseEntity<SimpleResponse> response
+                = selfRestClient.getSimple();
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            SimpleResponse simpleResponse = response.getBody();
+            if (simpleResponse != null) {
+                simpleResponse.setPathString(feignProxyUrl);
+                return new ResponseEntity<>(simpleResponse, response.getStatusCode());
+            }
+        }
+
+        return response;
+    }
 }
